@@ -17,7 +17,7 @@ import { deserializeUser } from "./middlewares/deserializeUser";
 const app = express();
 const PORT = Bun.env.PORT || 5000;
 
-app.use(morgan("combined"));
+app.use(morgan("common"));
 app.use(helmet());
 app.use(
   cors({

@@ -1,12 +1,9 @@
 import express from "express";
-import * as authController from "../../controllers/user-controller";
+import * as userController from "../../controllers/user-controller";
 import { requireUser } from "../../middlewares/requireUser";
 const router = express.Router();
 
-router.post("/sign-up", authController.createUserHandler);
-router.post("/login", authController.loginUserHandler);
-router.get("/get-user", requireUser, authController.loggedInUserHandler);
-router.get("/refresh", authController.refreshHandler);
-router.get("/logout", authController.logoutHandler);
+router.post("/register", userController.registerUserHandler);
+router.get("/get-user", requireUser, userController.loggedInUserHandler);
 
 export default router;
