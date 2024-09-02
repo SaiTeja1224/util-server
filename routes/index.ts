@@ -1,6 +1,6 @@
 import express from "express";
 import v1Router from "./v1";
-import ExpressError from "../lib/express-error";
+import { sendError } from "../lib/response-helper";
 
 const router = express.Router();
 
@@ -11,7 +11,7 @@ router.get("/", (req, res) => {
 });
 
 router.use("*", (req, res, next) => {
-  next(new ExpressError("404! Not Found", 404));
+  sendError(404, "404! Not Found");
 });
 
 export default router;

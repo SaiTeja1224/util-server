@@ -31,7 +31,8 @@ export const sendSuccess = (
  */
 export const sendError = (
   statusCode = 500,
-  message = "Internal Server Error"
+  message = "Internal Server Error",
+  data = {}
 ) => {
-  throw new ExpressError(message, statusCode);
+  throw new ExpressError(message, statusCode, data);
 };

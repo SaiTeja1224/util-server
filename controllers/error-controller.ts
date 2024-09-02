@@ -21,13 +21,14 @@ export const handleErrors = (
   if (err.isOperational) {
     res.status(err.statusCode).json({
       status: "error",
+      data: err.data,
       message: err.message,
     });
   } else {
     console.error("ERROR 💥", err);
     res.status(500).json({
       status: "error",
-      message: "Something went very wrong!",
+      message: "Something went wrong!",
     });
   }
 };
