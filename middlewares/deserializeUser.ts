@@ -50,17 +50,25 @@ export const deserializeUser = catchAsync(
         decodedRefreshToken.user
       );
 
-      res.cookie("accessToken", newAccessToken, {
-        httpOnly: true,
-        // 15 mins
-        maxAge: 15 * 60 * 1000,
-        secure: Bun.env.NODE_ENV === "production",
-        sameSite: "none",
-      });
+      const decoded = verifyToken(newAccessToken, "accessToken");
+      
+      if (decoded) {
+      
+        res.cookie("accessToken", newAccessToken, {
+          httpOnly: true,
+          // 15 mins
+          maxAge: 15 * 60 * 1000,
+          secure: Bun.env.NODE_ENV === "production",
+          sameSite: "none",
+        });
+
+        res.locals.user = decoded;
+
+      }
+
+      return next();
     } else {
       return sendError(403, "Invalid Token!");
     }
-
-    return next();
   }
 );
