@@ -155,10 +155,10 @@ export const validateTokenHandler = catchAsync(async (req, res) => {
     await AuthService.validateToken(accessToken, refreshToken);
 
   if (error) {
-    return sendError(401, type);
+    return sendError(403, type);
   }
 
-  return sendSuccess(res, 200, "Token Verified", {
+  return sendSuccess(res, 200, type, {
     accessToken: newAccessToken,
     ...decoded,
   });
