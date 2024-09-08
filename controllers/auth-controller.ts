@@ -62,7 +62,7 @@ export const loginHandler = catchAsync(async (req, res) => {
       })
       .cookie("accessToken", accessToken, {
         httpOnly: true,
-        // 15 mins
+        // 15 secs
         maxAge: 15 * 60 * 1000,
         secure: Bun.env.NODE_ENV === "production",
         sameSite: "none",
@@ -95,7 +95,7 @@ export const refreshHandler = catchAsync(async (req, res) => {
     return sendSuccess(
       res.cookie("accessToken", newAccessToken, {
         httpOnly: true,
-        // 15 mins
+        // 15 secs
         maxAge: 15 * 60 * 1000,
         secure: Bun.env.NODE_ENV === "production",
         sameSite: "none",
@@ -124,7 +124,7 @@ export const logoutHandler = catchAsync(async (req, res) => {
 
     res.clearCookie("accessToken", {
       httpOnly: true,
-      // 15 mins
+      // 15 secs
       maxAge: 15 * 60 * 1000,
       secure: Bun.env.NODE_ENV === "production",
       sameSite: "none",
@@ -142,4 +142,24 @@ export const logoutHandler = catchAsync(async (req, res) => {
   } else {
     return sendError(403, "Invalid Token!");
   }
+});
+
+export const validateTokenHandler = catchAsync(async (req, res) => {
+  const { accessToken, refreshToken } = req.body;
+
+  if (!accessToken || !refreshToken) {
+    return sendError(400, "Invalid Request");
+  }
+
+  const { error, type, decoded, newAccessToken } =
+    await AuthService.validateToken(accessToken, refreshToken);
+
+  if (error) {
+    return sendError(401, type);
+  }
+
+  return sendSuccess(res, 200, "Token Verified", {
+    accessToken: newAccessToken,
+    ...decoded,
+  });
 });

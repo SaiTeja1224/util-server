@@ -1,6 +1,7 @@
-import { signToken } from "../lib/jwt";
+import { signToken, verifyToken } from "../lib/jwt";
+import logger from "../lib/logger";
 import { getRedisInstance } from "../lib/redis";
-import type { TPublicUser } from "../lib/types";
+import type { RefreshToken, TPublicUser } from "../lib/types";
 
 const createSession = async ({
   sessionDetails,
@@ -86,4 +87,63 @@ export const signRefreshToken = async ({
   return signToken({ user, sessionId }, "refreshToken", {
     expiresIn: "15d",
   });
+};
+
+export const validateToken = async (
+  accessToken: string,
+  refreshToken: string
+) => {
+  const decoded = verifyToken<TPublicUser>(accessToken, "accessToken");
+
+  if (decoded) {
+    return {
+      error: false,
+      type: "ACCESS_TOKEN_VERIFIED" as const,
+      decoded: decoded,
+    };
+  }
+
+  logger.info("Access Token Expired");
+
+  const decodedRefreshToken = verifyToken<RefreshToken>(
+    refreshToken,
+    "refreshToken"
+  );
+
+  if (decodedRefreshToken) {
+    const session = await getSession(decodedRefreshToken.sessionId);
+
+    if (!session || !session.valid) {
+      return {
+        error: true,
+        type: "INVALID_REFRESH_TOKEN" as const,
+        decoded: null,
+      };
+    }
+
+    const newAccessToken = signAccessToken(decodedRefreshToken.user);
+
+    const decoded = verifyToken(newAccessToken, "accessToken");
+
+    if (decoded) {
+      return {
+        error: false,
+        type: "NEW_ACCESS_TOKEN" as const,
+        decoded: decoded,
+        newAccessToken,
+      };
+    } else {
+      return {
+        error: true,
+        type: "NEW_ACCESS_TOKEN_FAILED" as const,
+        decoded: null,
+      };
+    }
+  } else {
+    return {
+      error: true,
+      type: "INVALID_REFRESH_TOKEN" as const,
+      decoded: null,
+    };
+  }
 };

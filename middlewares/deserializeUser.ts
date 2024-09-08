@@ -1,7 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { verifyToken } from "../lib/jwt";
 import { sendError } from "../lib/response-helper";
-import type { RefreshToken } from "../lib/types";
 import * as AuthService from "../services/auth-service";
 import catchAsync from "../lib/catch-async";
 
@@ -13,62 +11,42 @@ export const deserializeUser = catchAsync(
       return next();
     }
 
-    const decoded = verifyToken(accessToken, "accessToken");
+    const refreshToken = req.cookies?.["refreshToken"];
 
-    if (decoded) {
+    const { error, type, decoded, newAccessToken } =
+      await AuthService.validateToken(accessToken, refreshToken);
+
+    console.log(type);
+
+    if (!error && type === "ACCESS_TOKEN_VERIFIED" && decoded) {
       res.locals.user = decoded;
       return next();
     }
 
-    console.log("Access Token Expired");
+    if (error && type === "INVALID_REFRESH_TOKEN") {
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        // 15 days
+        maxAge: 60 * 60 * 24 * 15 * 1000,
+        secure: Bun.env.NODE_ENV === "production",
+        sameSite: "none",
+      });
 
-    const refreshToken = req.cookies?.["refreshToken"];
-
-    const decodedRefreshToken = verifyToken<RefreshToken>(
-      refreshToken,
-      "refreshToken"
-    );
-
-    if (decodedRefreshToken) {
-      const session = await AuthService.getSession(
-        decodedRefreshToken.sessionId
-      );
-
-      if (!session || !session.valid) {
-        res.clearCookie("refreshToken", {
-          httpOnly: true,
-          // 15 days
-          maxAge: 60 * 60 * 24 * 15 * 1000,
-          secure: Bun.env.NODE_ENV === "production",
-          sameSite: "none",
-        });
-
-        return sendError(403, "Invalid Token!");
-      }
-
-      const newAccessToken = AuthService.signAccessToken(
-        decodedRefreshToken.user
-      );
-
-      const decoded = verifyToken(newAccessToken, "accessToken");
-      
-      if (decoded) {
-      
-        res.cookie("accessToken", newAccessToken, {
-          httpOnly: true,
-          // 15 mins
-          maxAge: 15 * 60 * 1000,
-          secure: Bun.env.NODE_ENV === "production",
-          sameSite: "none",
-        });
-
-        res.locals.user = decoded;
-
-      }
-
-      return next();
-    } else {
-      return sendError(403, "Invalid Token!");
+      return sendError(403, type);
     }
+
+    if (!error && type === "NEW_ACCESS_TOKEN" && decoded) {
+      res.cookie("accessToken", newAccessToken, {
+        httpOnly: true,
+        // 15 secs
+        maxAge: 15 * 60 * 1000,
+        secure: Bun.env.NODE_ENV === "production",
+        sameSite: "none",
+      });
+
+      res.locals.user = decoded;
+    }
+
+    return next();
   }
 );

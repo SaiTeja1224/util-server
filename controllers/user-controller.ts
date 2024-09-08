@@ -46,7 +46,7 @@ export const registerUserHandler = catchAsync(async (req, res) => {
         })
         .cookie("accessToken", accessToken, {
           httpOnly: true,
-          // 15 mins
+          // 15 secs
           maxAge: 15 * 60 * 1000,
           secure: Bun.env.NODE_ENV === "production",
           sameSite: "none",
