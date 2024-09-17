@@ -16,8 +16,6 @@ export const deserializeUser = catchAsync(
     const { error, type, decoded, newAccessToken } =
       await AuthService.validateToken(accessToken, refreshToken);
 
-    console.log(type);
-
     if (!error && type === "ACCESS_TOKEN_VERIFIED" && decoded) {
       res.locals.user = decoded;
       return next();

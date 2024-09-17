@@ -145,14 +145,15 @@ export const logoutHandler = catchAsync(async (req, res) => {
 });
 
 export const validateTokenHandler = catchAsync(async (req, res) => {
-  const { accessToken, refreshToken } = req.body;
+  const accessToken = req.headers.authorization?.split(" ")[1]; // Get Bearer token
+  const refreshToken = req.headers["x-refresh-token"]; // Get refresh token
 
   if (!accessToken || !refreshToken) {
     return sendError(400, "Invalid Request");
   }
 
   const { error, type, decoded, newAccessToken } =
-    await AuthService.validateToken(accessToken, refreshToken);
+    await AuthService.validateToken(accessToken, refreshToken as string);
 
   if (error) {
     return sendError(403, type);
