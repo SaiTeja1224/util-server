@@ -4,7 +4,7 @@ import { getRedisInstance } from "../lib/redis";
 import { sendError } from "../lib/response-helper";
 
 const WINDOW_SIZE_IN_SECONDS = 60; // Window size for rate limiting (e.g., 60 seconds)
-const MAX_REQUESTS = 2; // Max number of requests allowed per window per user
+const MAX_REQUESTS = 30; // Max number of requests allowed per window per user
 
 export const rateLimiter = catchAsync(
   async (req: Request, _: Response, next: NextFunction) => {
