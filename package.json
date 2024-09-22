@@ -1,5 +1,5 @@
 {
-  "name": "auth-server",
+  "name": "utils-server",
   "module": "index.ts",
   "type": "module",
   "scripts": {

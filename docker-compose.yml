@@ -1,0 +1,19 @@
+services:
+  hobby:
+    container_name: utils-server
+    image: utils-server-image:latest
+    networks:
+      - utils-server-network
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "5000:5002"
+    volumes:
+      - ./:/app
+    working_dir: /app
+    command: bun run index.ts --watch
+
+networks:
+  utils-server-network:
+    name: utils-server-network
