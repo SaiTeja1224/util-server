@@ -6,7 +6,7 @@ import { sendError } from "../lib/response-helper";
 const WINDOW_SIZE_IN_SECONDS = 60; // Window size for rate limiting (e.g., 60 seconds)
 const MAX_REQUESTS = 30; // Max number of requests allowed per window per user
 
-export const rateLimiter = catchAsync(
+export const rateLimiter = (noOfRequests ?: number) => catchAsync(
   async (req: Request, _: Response, next: NextFunction) => {
     const currentTime = Math.floor(Date.now() / 1000);
     const ip = req.ip;
@@ -19,7 +19,7 @@ export const rateLimiter = catchAsync(
       (timestamp) => Number(timestamp) > currentTime - WINDOW_SIZE_IN_SECONDS
     );
 
-    if (validTimeStamps.length >= MAX_REQUESTS) {
+    if (validTimeStamps.length >= (noOfRequests || MAX_REQUESTS)) {
       return sendError(429, "Too Many Requests"); // 429 status code for rate limiting
     }
 
