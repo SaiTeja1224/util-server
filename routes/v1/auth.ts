@@ -8,6 +8,6 @@ router.get("/logout", authController.logoutHandler);
 router.get("/refresh", authController.refreshHandler);
 
 // INTERNAL
-router.get("/validate", rateLimiter, authController.validateTokenHandler);
+router.get("/validate", rateLimiter(), authController.validateTokenHandler);
 
 export default router;
