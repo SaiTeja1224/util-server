@@ -3,8 +3,8 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "start": "bun run index.ts",
-    "dev": "bun --watch run index.ts",
+    "start": "bun index.ts",
+    "dev": "bun --watch index.ts",
     "lint": "bun run eslint .",
     "format": "bun run prettier --write .",
     "test": "bun test"
