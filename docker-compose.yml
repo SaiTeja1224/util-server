@@ -1,15 +1,15 @@
 services:
-  hobby:
+  utility:
     container_name: utils-server
-    image: utils-server-image
+    image: webdevsai/utils-server:latest
     networks:
-      - utils-server-network
+      - backend
     build: .
     env_file:
       - .env
     ports:
-      - "8002:5002"
+      - "8004:5000"
 
 networks:
-  utils-server-network:
-    name: utils-server-network
+  backend:
+    external: true

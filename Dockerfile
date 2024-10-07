@@ -22,7 +22,7 @@ RUN chown -R bun:bun /app
 USER bun
 
 # Expose the application port
-EXPOSE 5002
+EXPOSE 5000
 
 # Set the command to run your application
 CMD ["bun", "run", "dev"]
